@@ -1,1 +1,1 @@
-# university-server
+# University Server
