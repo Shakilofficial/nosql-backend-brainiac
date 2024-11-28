@@ -24,10 +24,10 @@ app.get('/', (req: Request, res: Response) => {
   });
 });
 
-//global error handler
+// Global error handler
 app.use(globalErrorHandler);
 
-//Not Found 
+// Not Found handler
 app.use(notFound);
 
 export default app;

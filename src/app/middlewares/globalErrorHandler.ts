@@ -10,13 +10,13 @@ const globalErrorHandler = (
   res: Response,
   next: NextFunction,
 ) => {
-  const statusCode = 500;
-  const message = error.message || 'Something went wrong!';
+  const statusCode = error.statusCode || 500;
+  const message = error.message || 'Internal Server Error';
 
-  return res.status(statusCode).json({
+  res.status(statusCode).json({
     success: false,
     message,
-    error,
+    stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
   });
 };
 
