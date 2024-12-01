@@ -5,7 +5,7 @@ import {
   Months,
 } from './academicSemester.constant';
 
-const academicSemesterValidationSchema = z.object({
+const createAcademicSemesterValidationSchema = z.object({
   body: z.object({
     name: z.enum([...AcademicSemesterName] as [string, ...string[]]),
     code: z.enum([...AcademicSemesterCode] as [string, ...string[]]),
@@ -15,4 +15,6 @@ const academicSemesterValidationSchema = z.object({
   }),
 });
 
-export const academicSemesterValidations = { academicSemesterValidationSchema };
+export const academicSemesterValidations = {
+  createAcademicSemesterValidationSchema,
+};
