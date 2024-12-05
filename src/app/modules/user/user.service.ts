@@ -57,9 +57,8 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
     if (err instanceof AppError) {
       throw err; // re-throw the custom AppError
     }
-
     // If the error is not an AppError, throw a generic error with a custom message
-    throw new AppError(500, 'Failed to create student');
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create student');
   }
 };
 
