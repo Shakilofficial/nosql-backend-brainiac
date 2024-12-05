@@ -47,6 +47,16 @@ academicSemesterSchema.pre('save', async function (next) {
   next();
 });
 
+//check if semester exist
+academicSemesterSchema.pre('findOneAndUpdate', async function (next) {
+  const query = this.getQuery();
+  const isSemesterExist = await AcademicSemester.findOne(query);
+  if (!isSemesterExist) {
+    throw new Error('Semester not found');
+  }
+  next();
+});
+
 export const AcademicSemester = model<TAcademicSemester>(
   'AcademicSemester',
   academicSemesterSchema,
