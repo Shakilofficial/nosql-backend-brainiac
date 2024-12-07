@@ -1,6 +1,6 @@
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
-import AppError from '../../utils/AppError';
+import AppError from '../../errors/AppError';
 import { User } from '../user/user.model';
 import { TStudent } from './student.interface';
 import { Student } from './student.model';
@@ -59,7 +59,7 @@ const deleteStudentFromDB = async (id: string) => {
     // Check if the student exists
     const existingStudent = await Student.isUserExists(id);
     if (!existingStudent) {
-      throw new AppError(httpStatus.NOT_FOUND, 'Student not found');
+      throw new AppError(httpStatus.NOT_FOUND, 'Student not found 🔍');
     }
 
     const deleteStudent = await Student.findOneAndUpdate(
@@ -69,7 +69,7 @@ const deleteStudentFromDB = async (id: string) => {
     );
 
     if (!deleteStudent) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete student');
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete student 🚫');
     }
 
     const deletedUser = await User.findOneAndUpdate(
@@ -79,7 +79,7 @@ const deleteStudentFromDB = async (id: string) => {
     );
 
     if (!deletedUser) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete user');
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete user 🚫');
     }
     await session.commitTransaction();
     await session.endSession();
@@ -91,7 +91,7 @@ const deleteStudentFromDB = async (id: string) => {
     if (err instanceof AppError) {
       throw err;
     }
-    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create student');
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create student 🚫');
   }
 };
 

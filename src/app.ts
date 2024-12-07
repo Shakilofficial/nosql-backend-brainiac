@@ -14,12 +14,22 @@ app.use(express.json());
 // Routes
 app.use('/api/v1', router);
 
-// Health Check
+// Health Check Route
 app.get('/', (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: '🌐 University Server is live 🚀',
+    data: null,
+  });
+});
+
+// Test Route
+app.get('/test', (req: Request, res: Response) => {
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Test route is working 🚀',
     data: null,
   });
 });

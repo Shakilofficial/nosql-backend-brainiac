@@ -1,6 +1,7 @@
 import { model, Schema } from 'mongoose';
+
 import { TAcademicFaculty } from './academicFaculty.interface';
-import AppError from '../../utils/AppError';
+import AppError from '../../errors/AppError';
 
 const academicFacultySchema = new Schema<TAcademicFaculty>(
   {
@@ -19,7 +20,7 @@ academicFacultySchema.pre('save', async function (next) {
     name: this.name,
   });
   if (isFacultyExist) {
-    throw new AppError(400, 'Faculty name already exist');
+    throw new AppError(400, 'Faculty name already exists 🚫');
   }
   next();
 });

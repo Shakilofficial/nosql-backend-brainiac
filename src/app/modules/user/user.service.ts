@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
 import config from '../../config';
-import AppError from '../../utils/AppError';
+import AppError from '../../errors/AppError';
 import { AcademicSemester } from '../academicSemester/academicSemester.model';
 import { TStudent } from '../student/student.interface';
 import { Student } from '../student/student.model';
@@ -24,7 +24,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
 
   // Handle null academic semester
   if (!admissionSemester) {
-    throw new AppError(400, 'Invalid semester ID');
+    throw new AppError(400, 'Invalid semester ID ❌');
   }
 
   const session = await mongoose.startSession();
@@ -37,7 +37,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
     const newUser = await User.create([userData], { session });
 
     if (!newUser.length) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create user');
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create user 🚫');
     }
     payload.id = newUser[0].id; //set id, _id as user
     payload.user = newUser[0]._id; //reference id
@@ -45,7 +45,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
     // create new student(transaction -2)
     const newStudent = await Student.create([payload], { session });
     if (!newStudent.length) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create student');
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create student 🚫');
     }
     await session.commitTransaction();
     await session.endSession();
@@ -58,7 +58,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
       throw err; // re-throw the custom AppError
     }
     // If the error is not an AppError, throw a generic error with a custom message
-    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create student');
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create student 🚫');
   }
 };
 
