@@ -29,7 +29,7 @@ app.get('/test', (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Test route is working 🚀',
+    message: 'Test route is working 🚀 ',
     data: null,
   });
 });

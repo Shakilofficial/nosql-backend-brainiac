@@ -5,20 +5,7 @@ import { connectDB } from './app/config/db';
 
 let server: Server;
 
-const start = async (): Promise<void> => {
-  try {
-    await connectDB();
-    server = app.listen(config.port, () => {
-      console.log(`🚀 Server is running on port ${config.port} 🏃🏽‍♂️➡️`);
-    });
-  } catch (error) {
-    console.error('🚨 Failed to start the server ❌', error);
-    process.exit(1);
-  }
-};
-
-const shutdown = (reason: string): void => {
-  console.log(`🚨 ${reason}, shutting down the server 🏃🏽‍♂️`);
+const shutdown = (): void => {
   if (server) {
     server.close(() => {
       console.log('👋 Server is closed 🏃🏽‍♂️');
@@ -32,13 +19,25 @@ const shutdown = (reason: string): void => {
 // Handle unhandled rejections
 process.on('unhandledRejection', (reason) => {
   console.error('🚨 Unhandled Rejection detected ❌:', reason);
-  shutdown('Unhandled Rejection');
+  shutdown();
 });
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
   console.error('🚨 Uncaught Exception detected ❌:', error);
-  shutdown('Uncaught Exception');
+  shutdown();
 });
+
+const start = async (): Promise<void> => {
+  try {
+    await connectDB();
+    server = app.listen(config.port, () => {
+      console.log(`🚀 Server is running on port ${config.port} 🏃🏽‍♂️➡️`);
+    });
+  } catch (error) {
+    console.error('🚨 Failed to start the server ❌', error);
+    process.exit(1);
+  }
+};
 
 start();
