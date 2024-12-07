@@ -50,15 +50,10 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
     await session.commitTransaction();
     await session.endSession();
     return newStudent;
-  } catch (err: unknown) {
+  } catch (err: any) {
     await session.abortTransaction();
     await session.endSession();
-
-    if (err instanceof AppError) {
-      throw err; // re-throw the custom AppError
-    }
-    // If the error is not an AppError, throw a generic error with a custom message
-    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create student 🚫');
+    throw new Error(err);
   }
 };
 
