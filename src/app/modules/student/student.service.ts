@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
 import QueryBuilder from '../../builder/QueryBuilder';
@@ -85,17 +86,17 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
 };
 
 const getSingleStudentFromDB = async (id: string) => {
-  const result = await Student.findOne({ id })
+  const result = await Student.findById({ id })
     .populate('admissionSemester')
     .populate({ path: 'academicDepartment', populate: 'academicFaculty' });
   return result;
 };
 
 const updateStudentIntoDB = async (id: string, payload: Partial<TStudent>) => {
-  const { name, guardian, localGuardian, ...remainingStudentData } = payload;
+  const { name, guardian, localGuardian, ...rest } = payload;
 
   const modifiedUpdatedData: Record<string, unknown> = {
-    ...remainingStudentData,
+    ...rest,
   };
 
   if (name && Object.keys(name).length) {
@@ -116,7 +117,7 @@ const updateStudentIntoDB = async (id: string, payload: Partial<TStudent>) => {
     }
   }
 
-  const result = await Student.findOneAndUpdate({ id }, modifiedUpdatedData, {
+  const result = await Student.findByIdAndUpdate(id, modifiedUpdatedData, {
     new: true,
     runValidators: true,
   });
@@ -128,14 +129,8 @@ const deleteStudentFromDB = async (id: string) => {
   try {
     session.startTransaction();
 
-    // Check if the student exists
-    const existingStudent = await Student.isUserExists(id);
-    if (!existingStudent) {
-      throw new AppError(httpStatus.NOT_FOUND, 'Student not found 🔍');
-    }
-
-    const deleteStudent = await Student.findOneAndUpdate(
-      { id },
+    const deleteStudent = await Student.findByIdAndUpdate(
+      id,
       { isDeleted: true },
       { new: true, session },
     );
@@ -143,9 +138,9 @@ const deleteStudentFromDB = async (id: string) => {
     if (!deleteStudent) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete student 🚫');
     }
-
-    const deletedUser = await User.findOneAndUpdate(
-      { id },
+    const userId = deleteStudent.user;
+    const deletedUser = await User.findByIdAndUpdate(
+      userId,
       { isDeleted: true },
       { new: true, session },
     );
@@ -156,14 +151,10 @@ const deleteStudentFromDB = async (id: string) => {
     await session.commitTransaction();
     await session.endSession();
     return deleteStudent;
-  } catch (err: unknown) {
-    await session.abortTransaction();
-    await session.endSession();
-
-    if (err instanceof AppError) {
-      throw err;
-    }
-    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create student 🚫');
+  } catch (err: any) {
+    session.abortTransaction();
+    session.endSession();
+    throw new Error(err);
   }
 };
 
