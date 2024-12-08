@@ -5,28 +5,44 @@ const findLastStudentId = async () => {
   const lastStudent = await User.findOne({ role: 'student' }, { id: 1, _id: 0 })
     .sort({ createdAt: -1 })
     .lean();
-  return lastStudent?.id || null;
+  return lastStudent?.id ? lastStudent.id : undefined;
 };
 
 export const generateStudentId = async (payload: TAcademicSemester) => {
+  let currentId = (0).toString();
   const lastStudentId = await findLastStudentId();
-  const currentSemesterCode = payload.code; // e.g., '01'
-  const currentYear = payload.year; // e.g., '2024'
-  let incrementId = '0001'; // Default for the first student
-
-  if (lastStudentId) {
-    const lastStudentSemesterCode = lastStudentId.substring(4, 6);
-    const lastStudentYear = lastStudentId.substring(0, 4);
-    const lastStudentIncrement = parseInt(lastStudentId.substring(6), 10);
-
-    if (
-      lastStudentSemesterCode === currentSemesterCode &&
-      lastStudentYear === currentYear
-    ) {
-      incrementId = (lastStudentIncrement + 1).toString().padStart(4, '0');
-    }
+  const lastStudentSemesterCode = lastStudentId?.substring(4, 6);
+  const lastStudentYear = lastStudentId?.substring(0, 4);
+  const currentSemesterCode = payload.code;
+  const currentYear = payload.year;
+  if (
+    lastStudentId &&
+    lastStudentSemesterCode === currentSemesterCode &&
+    lastStudentYear === currentYear
+  ) {
+    currentId = lastStudentId.substring(6);
   }
+  let incrementId = (Number(currentId) + 1).toString().padStart(4, '0');
+  incrementId = `${payload.year}${payload.code}${incrementId}`;
+  return incrementId;
+};
 
-  const newId = `${currentYear}${currentSemesterCode}${incrementId}`;
-  return newId;
+// create Faculty Id
+
+export const findLastFacultyId = async () => {
+  const lastFaculty = await User.findOne({ role: 'faculty' }, { id: 1, _id: 0 })
+    .sort({ createdAt: -1 })
+    .lean();
+  return lastFaculty?.id ? lastFaculty.id.substring(2) : undefined;
+};
+
+export const generateFacultyId = async () => {
+  let currentId = (0).toString();
+  const lastFacultyId = await findLastFacultyId();
+  if (lastFacultyId) {
+    currentId = lastFacultyId.substring(2);
+  }
+  let incrementId = (Number(currentId) + 1).toString().padStart(4, '0');
+  incrementId = `F-${incrementId}`;
+  return incrementId;
 };
