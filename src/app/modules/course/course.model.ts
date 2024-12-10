@@ -1,5 +1,6 @@
 import { model, Schema } from 'mongoose';
 import {
+  CourseModel,
   TCourse,
   TCourseFaculty,
   TPreRequisiteCourses,
@@ -18,13 +19,14 @@ const preRequisiteCoursesSchema = new Schema<TPreRequisiteCourses>({
   },
 });
 
-const courseSchema = new Schema<TCourse>(
+const courseSchema = new Schema<TCourse, CourseModel>(
   {
     title: {
       type: String,
       required: [true, 'Please enter your course title'],
       trim: true,
       maxlength: [30, 'Course title should not be more than 30 characters'],
+      unique: true,
     },
     prefix: {
       type: String,
@@ -37,6 +39,7 @@ const courseSchema = new Schema<TCourse>(
       required: [true, 'Please enter your course code'],
       trim: true,
       maxlength: [10, 'Course code should not be more than 10 characters'],
+      unique: true,
     },
     credits: {
       type: Number,
@@ -54,7 +57,29 @@ const courseSchema = new Schema<TCourse>(
   { timestamps: true },
 );
 
-export const Course = model<TCourse>('Course', courseSchema);
+//filter out deleted courses
+courseSchema.pre('find', function (next) {
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
+
+courseSchema.pre('findOne', function (next) {
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
+
+courseSchema.pre('aggregate', function (next) {
+  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
+  next();
+});
+
+//check if course exists
+courseSchema.statics.isCourseExists = async function (id: string) {
+  const existingCourse = await Course.findOne({ id });
+  return existingCourse;
+};
+
+export const Course = model<TCourse, CourseModel>('Course', courseSchema);
 
 const courseFacultySchema = new Schema<TCourseFaculty>({
   course: {
