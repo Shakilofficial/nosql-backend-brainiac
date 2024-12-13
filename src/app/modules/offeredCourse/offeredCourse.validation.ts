@@ -16,10 +16,6 @@ const createOfferedCourseValidationSchema = z.object({
         required_error: 'Semester registration id is required',
         invalid_type_error: 'Semester registration id is invalid',
       }),
-      academicSemester: z.string({
-        required_error: 'Academic semester id is required',
-        invalid_type_error: 'Academic semester id is invalid',
-      }),
       academicFaculty: z.string({
         required_error: 'Academic faculty id is required',
         invalid_type_error: 'Academic faculty id is invalid',
