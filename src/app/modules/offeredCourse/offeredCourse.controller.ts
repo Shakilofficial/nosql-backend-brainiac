@@ -16,7 +16,9 @@ const createOfferedCourse = catchAsync(async (req, res) => {
 });
 
 const getAllOfferedCourses = catchAsync(async (req, res) => {
-  const result = await OfferedCourseServices.getAllOfferedCoursesFromDB();
+  const result = await OfferedCourseServices.getAllOfferedCoursesFromDB(
+    req.query,
+  );
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -38,10 +40,10 @@ const getSingleOfferedCourse = catchAsync(async (req, res) => {
 
 const updateOfferedCourse = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const payload = req.body;
+
   const result = await OfferedCourseServices.updateOfferedCourseIntoDB(
     id,
-    payload,
+    req.body,
   );
   sendResponse(res, {
     statusCode: httpStatus.OK,
