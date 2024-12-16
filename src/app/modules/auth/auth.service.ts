@@ -1,9 +1,10 @@
+import bcrypt from 'bcrypt';
 import httpStatus from 'http-status';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../../config';
 import AppError from '../../errors/AppError';
 import { User } from '../user/user.model';
-import { TLoginUser } from './auth.interface';
+import { TChangePassword, TLoginUser } from './auth.interface';
 
 const loginUser = async (payload: TLoginUser) => {
   //checking if user exists
@@ -48,6 +49,51 @@ const loginUser = async (payload: TLoginUser) => {
   };
 };
 
+const changePassword = async (
+  userData: JwtPayload,
+  payload: TChangePassword,
+) => {
+  //checking if user exists
+  const user = await User.isUserExistsByCustomId(userData.userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  //checking if the user is already deleted
+
+  if (user.isDeleted) {
+    throw new AppError(httpStatus.FORBIDDEN, 'User is deleted');
+  }
+  //checking if the user status is blocked
+
+  if (user.status === 'blocked') {
+    throw new AppError(httpStatus.FORBIDDEN, 'User is blocked');
+  }
+
+  //checking if the password is matched
+  if (!(await User.isPasswordMatched(payload.oldPassword, user?.password))) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'Wrong Credentials !');
+  }
+  //hashing the new password
+  const newPassword = await bcrypt.hash(
+    payload.newPassword,
+    Number(config.bcrypt_salt_rounds),
+  );
+  //updating the password
+  await User.findOneAndUpdate(
+    {
+      id: userData.userId,
+      role: userData.role,
+    },
+    {
+      password: newPassword,
+      needsPasswordChange: false,
+      passwordChangedAt: new Date(),
+    },
+  );
+  return null;
+};
+
 export const AuthService = {
   loginUser,
+  changePassword,
 };
