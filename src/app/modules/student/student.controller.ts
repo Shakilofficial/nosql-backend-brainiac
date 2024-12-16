@@ -4,6 +4,7 @@ import sendResponse from '../../utils/sendResponse';
 import { StudentServices } from './student.service';
 
 const getAllStudents = catchAsync(async (req, res) => {
+  // console.log('test', req.user);
   const result = await StudentServices.getAllStudentsFromDB(req.query);
 
   sendResponse(res, {

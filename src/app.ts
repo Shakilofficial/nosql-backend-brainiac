@@ -24,7 +24,7 @@ app.get('/', (req: Request, res: Response) => {
   });
 });
 
-// Test Route
+// Test
 app.get('/test', (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: 200,
