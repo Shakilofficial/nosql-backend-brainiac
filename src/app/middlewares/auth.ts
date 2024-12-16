@@ -4,6 +4,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../config';
 import AppError from '../errors/AppError';
 import { TUserRole } from '../modules/user/user.interface';
+import { User } from '../modules/user/user.model';
 import catchAsync from '../utils/catchAsync';
 
 const auth = (...requiredRoles: TUserRole[]) => {
@@ -16,29 +17,46 @@ const auth = (...requiredRoles: TUserRole[]) => {
     }
 
     // Verify if the token is valid
-    jwt.verify(
+    const decoded = jwt.verify(
       token,
       config.jwt_access_secret as string,
-      function (err, decoded) {
-        if (err) {
-          throw new AppError(
-            httpStatus.UNAUTHORIZED,
-            'Invalid token. You are not authorized',
-          );
-        }
+    ) as JwtPayload;
+    const { role, userId, iat } = decoded;
 
-        const role = (decoded as JwtPayload).role;
+    const user = await User.isUserExistsByCustomId(userId);
+    if (!user) {
+      throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized');
+    }
 
-        // Validate required roles
-        if (requiredRoles && !requiredRoles.includes(role)) {
-          throw new AppError(httpStatus.FORBIDDEN, 'You are not authorized');
-        }
+    //checking if the user is already deleted
 
-        // Attach the user payload to the request object
-        req.user = decoded as JwtPayload;
-        next();
-      },
-    );
+    if (user.isDeleted) {
+      throw new AppError(httpStatus.FORBIDDEN, 'User is deleted');
+    }
+    //checking if the user status is blocked
+
+    if (user.status === 'blocked') {
+      throw new AppError(httpStatus.FORBIDDEN, 'User is blocked');
+    }
+
+    if (
+      user.passwordChangedAt &&
+      User.isJWTIssuedBeforePasswordChanged(
+        user.passwordChangedAt,
+        iat as number,
+      )
+    ) {
+      throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized');
+    }
+
+    // Validate required roles
+    if (requiredRoles && !requiredRoles.includes(role)) {
+      throw new AppError(httpStatus.FORBIDDEN, 'You are not authorized');
+    }
+
+    // Attach the user payload to the request object
+    req.user = decoded as JwtPayload;
+    next();
   });
 };
 
