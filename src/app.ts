@@ -1,3 +1,4 @@
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
 import globalErrorHandler from './app/middlewares/globalErrorHandler';
@@ -8,7 +9,8 @@ import sendResponse from './app/utils/sendResponse';
 const app: Application = express();
 
 // Middlewares
-app.use(cors());
+app.use(cors({ origin: ['http://localhost:3000', 'http://localhost:5173'] }));
+app.use(cookieParser());
 app.use(express.json());
 
 // Routes
