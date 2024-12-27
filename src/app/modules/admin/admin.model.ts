@@ -62,7 +62,7 @@ const adminSchema = new Schema<TAdmin, AdminModel>(
       required: [true, 'Please enter your email'],
       unique: true,
       trim: true,
-      maxlength: [30, 'Email should not be more than 20 characters'],
+      maxlength: [40, 'Email should not be more than 40 characters'],
     },
     contactNo: {
       type: String,
