@@ -1,12 +1,12 @@
 import bcrypt from 'bcrypt';
 import httpStatus from 'http-status';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import { JwtPayload } from 'jsonwebtoken';
 import config from '../../config';
 import AppError from '../../errors/AppError';
 import { sendEmail } from '../../utils/sendEmail';
 import { User } from '../user/user.model';
 import { TChangePassword, TLoginUser, TResetPassword } from './auth.interface';
-import { createToken } from './auth.utils';
+import { createToken, verifyToken } from './auth.utils';
 
 const loginUser = async (payload: TLoginUser) => {
   //checking if user exists
@@ -106,12 +106,9 @@ const changePassword = async (
 };
 
 const refreshToken = async (token: string) => {
-  const decoded = jwt.verify(
-    token,
-    config.jwt_refresh_secret as string,
-  ) as JwtPayload;
-  const { userId, iat } = decoded;
+  const decoded = verifyToken(token, config.jwt_refresh_secret as string);
 
+  const { userId, iat } = decoded as JwtPayload;
   //checking if user exists
   const user = await User.isUserExistsByCustomId(userId);
   if (!user) {
