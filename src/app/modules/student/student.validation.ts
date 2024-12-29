@@ -172,10 +172,10 @@ const updateStudentValidationSchema = z.object({
       permanentAddress: z.string().trim().optional(),
       guardian: updateGuardianValidationSchema.optional(),
       localGuardian: updateLocalGuardianValidationSchema.optional(),
-      profileImg: z
+      /*       profileImg: z
         .string()
         .url({ message: 'Profile Image must be a valid URL' })
-        .optional(),
+        .optional(), */
       admissionSemester: z
         .string()
         .regex(/^[a-f0-9]{24}$/, { message: 'Invalid Semester ID' })
