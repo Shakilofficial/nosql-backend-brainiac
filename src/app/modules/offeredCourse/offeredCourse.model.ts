@@ -60,6 +60,17 @@ const offeredCourseSchema = new Schema<TOfferedCourse>(
   { timestamps: true },
 );
 
+//remove __v
+offeredCourseSchema.pre('find', function (next) {
+  this.select('-__v'); // Exclude __v field
+  next();
+});
+
+offeredCourseSchema.pre('findOne', function (next) {
+  this.select('-__v'); // Exclude __v field
+  next();
+});
+
 export const OfferedCourse = model<TOfferedCourse>(
   'OfferedCourse',
   offeredCourseSchema,
