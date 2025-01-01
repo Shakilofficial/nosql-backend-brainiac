@@ -1,5 +1,4 @@
 import express from 'express';
-
 import auth from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validateRequest';
 import { USER_ROLE } from '../user/user.constant';
@@ -17,12 +16,31 @@ router.post(
   AcademicFacultyControllers.createAcademicFaculty,
 );
 
-router.get('/', AcademicFacultyControllers.getAllAcademicFaculties);
+router.get(
+  '/',
+  auth(
+    USER_ROLE.admin,
+    USER_ROLE.superAdmin,
+    USER_ROLE.faculty,
+    USER_ROLE.student,
+  ),
+  AcademicFacultyControllers.getAllAcademicFaculties,
+);
 
-router.get('/:facultyId', AcademicFacultyControllers.getSingleAcademicFaculty);
+router.get(
+  '/:facultyId',
+  auth(
+    USER_ROLE.admin,
+    USER_ROLE.superAdmin,
+    USER_ROLE.faculty,
+    USER_ROLE.student,
+  ),
+  AcademicFacultyControllers.getSingleAcademicFaculty,
+);
 
 router.patch(
   '/:facultyId',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
   validateRequest(
     academicFacultyValidations.updateAcademicFacultyValidationSchema,
   ),
