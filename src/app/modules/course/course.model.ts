@@ -98,6 +98,16 @@ const courseFacultySchema = new Schema<TCourseFaculty>({
   ],
 });
 
+courseFacultySchema.pre('find', function (next) {
+  this.select('-__v'); // Exclude __v field
+  next();
+});
+
+courseFacultySchema.pre('findOne', function (next) {
+  this.select('-__v'); // Exclude __v field
+  next();
+});
+
 export const CourseFaculty = model<TCourseFaculty>(
   'CourseFaculty',
   courseFacultySchema,
