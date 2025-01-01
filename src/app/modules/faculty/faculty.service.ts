@@ -20,7 +20,11 @@ const getAllFacultiesFromDB = async (query: Record<string, unknown>) => {
     .fields();
 
   const result = await FacultyQuery.modelQuery;
-  return result;
+  const meta = await FacultyQuery.countTotal();
+  return {
+    meta,
+    result,
+  };
 };
 const getSingleFacultyFromDB = async (id: string) => {
   const result = await Faculty.findById(id).populate('academicDepartment');

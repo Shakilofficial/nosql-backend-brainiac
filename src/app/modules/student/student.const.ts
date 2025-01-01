@@ -5,5 +5,5 @@ export const studentSearchableFields = [
   'name.lastName',
   'email',
   'contactNo',
-  'emergencyContactNo',
+  'presentAddress',
 ];

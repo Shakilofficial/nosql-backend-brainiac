@@ -7,19 +7,28 @@ import { studentValidations } from './student.validation';
 
 const router = express.Router();
 
-router.get('/:id', StudentControllers.getSingleStudent);
+router.get(
+  '/:id',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.faculty),
+  StudentControllers.getSingleStudent,
+);
 
 router.patch(
   '/:id',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
   validateRequest(studentValidations.updateStudentValidationSchema),
   StudentControllers.updateStudent,
 );
 
-router.delete('/:id', StudentControllers.deleteStudent);
+router.delete(
+  '/:id',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
+  StudentControllers.deleteStudent,
+);
 
 router.get(
   '/',
-  auth(USER_ROLE.student, USER_ROLE.faculty, USER_ROLE.admin),
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
   StudentControllers.getAllStudents,
 );
 
