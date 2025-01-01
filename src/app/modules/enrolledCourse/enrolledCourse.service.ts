@@ -237,7 +237,7 @@ const getMyEnrolledCoursesFromDB = async (
 
   const enrolledCourseQuery = new QueryBuilder(
     EnrolledCourse.find({ student: student._id }).populate(
-      'semesterRegistration academicSemester academicFaculty academicDepartment offeredCourse course student faculty',
+      'semesterRegistration academicSemester academicFaculty offeredCourse course student faculty',
     ),
     query,
   )
@@ -248,7 +248,6 @@ const getMyEnrolledCoursesFromDB = async (
 
   const result = await enrolledCourseQuery.modelQuery;
   const meta = await enrolledCourseQuery.countTotal();
-
   return {
     meta,
     result,
