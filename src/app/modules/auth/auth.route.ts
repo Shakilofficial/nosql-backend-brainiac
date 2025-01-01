@@ -14,7 +14,12 @@ router.post(
 );
 router.post(
   '/change-password',
-  auth(USER_ROLE.admin, USER_ROLE.faculty, USER_ROLE.student),
+  auth(
+    USER_ROLE.superAdmin,
+    USER_ROLE.admin,
+    USER_ROLE.faculty,
+    USER_ROLE.student,
+  ),
   validateRequest(AuthValidations.changePasswordValidationSchema),
   AuthControllers.changePassword,
 );
@@ -33,7 +38,6 @@ router.post(
 
 router.post(
   '/reset-password',
-  auth('admin', 'faculty', 'student'),
   validateRequest(AuthValidations.resetPasswordValidationSchema),
   AuthControllers.resetPassword,
 );
