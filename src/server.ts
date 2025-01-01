@@ -2,6 +2,7 @@ import { Server } from 'http';
 import app from './app';
 import config from './app/config';
 import { connectDB } from './app/config/db';
+import seedSuperAdmin from './app/config/seedSuperAdmin';
 
 let server: Server;
 
@@ -34,6 +35,7 @@ const start = async (): Promise<void> => {
     server = app.listen(config.port, () => {
       console.log(`🚀 Server is running on port ${config.port} 🏃🏽‍♂️➡️`);
     });
+    await seedSuperAdmin();
   } catch (error) {
     console.error('🚨 Failed to start the server ❌', error);
     process.exit(1);
