@@ -18,17 +18,33 @@ router.post(
 
 router.get(
   '/:semesterId',
+  auth(
+    USER_ROLE.superAdmin,
+    USER_ROLE.admin,
+    USER_ROLE.faculty,
+    USER_ROLE.student,
+  ),
   AcademicSemesterControllers.getSingleAcademicSemester,
 );
 
 router.patch(
-  '/:semesterId',auth(USER_ROLE.superAdmin, USER_ROLE.admin),
+  '/:semesterId',
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
   validateRequest(
     academicSemesterValidations.updateAcademicSemesterValidationSchema,
   ),
   AcademicSemesterControllers.updateAcademicSemester,
 );
 
-router.get('/', AcademicSemesterControllers.getAllAcademicSemesters);
+router.get(
+  '/',
+  auth(
+    USER_ROLE.superAdmin,
+    USER_ROLE.admin,
+    USER_ROLE.faculty,
+    USER_ROLE.student,
+  ),
+  AcademicSemesterControllers.getAllAcademicSemesters,
+);
 
 export const AcademicSemesterRoutes = router;
