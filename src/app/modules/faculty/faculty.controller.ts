@@ -20,7 +20,8 @@ const getAllFaculties = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Successfully fetched faculties',
-    data: result,
+    meta: result.meta,
+    data: result.result,
   });
 });
 
