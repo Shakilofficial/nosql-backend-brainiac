@@ -8,10 +8,7 @@ import { Faculty } from '../faculty/faculty.model';
 import { OfferedCourse } from '../offeredCourse/offeredCourse.model';
 import { SemesterRegistration } from '../semesterRegistration/semesterRegistration.model';
 import { Student } from '../student/student.model';
-import {
-  TEnrolledCourse,
-  TEnrolledCourseMarks,
-} from './enrolledCourse.interface';
+import { TEnrolledCourse } from './enrolledCourse.interface';
 import { EnrolledCourse } from './enrolledCourse.model';
 import { calculateGradeAndPoints } from './enrolledCourse.utils';
 
@@ -145,86 +142,6 @@ const createEnrolledCourseIntoDB = async (
   }
 };
 
-const updateEnrolledCourseMarksIntoDB = async (
-  facultyId: string,
-  payload: Partial<TEnrolledCourseMarks>,
-) => {
-  const { semesterRegistration, offeredCourse, student, courseMarks } = payload;
-
-  const isSemesterRegistrationExists =
-    await SemesterRegistration.findById(semesterRegistration);
-
-  if (!isSemesterRegistrationExists) {
-    throw new AppError(
-      httpStatus.NOT_FOUND,
-      'Semester registration not found !',
-    );
-  }
-
-  const isOfferedCourseExists = await OfferedCourse.findById(offeredCourse);
-
-  if (!isOfferedCourseExists) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Offered course not found !');
-  }
-
-  const isStudentExists = await Student.findById(student);
-
-  if (!isStudentExists) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Student not found !');
-  }
-
-  const faculty = await Faculty.findOne({ id: facultyId }, { _id: 1 });
-
-  if (!faculty) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Faculty not found !');
-  }
-
-  const isCourseBelongsToFaculty = await EnrolledCourse.findOne({
-    semesterRegistration,
-    offeredCourse,
-    student,
-    faculty: faculty._id,
-  });
-
-  if (!isCourseBelongsToFaculty) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Course not found !');
-  }
-
-  const modifiedData: Record<string, unknown> = {
-    ...courseMarks,
-  };
-
-  if (courseMarks?.finalExam) {
-    const { classTest1, midTerm, classTest2, finalExam } =
-      isCourseBelongsToFaculty.courseMarks;
-
-    const totalMarks =
-      Math.ceil(classTest1) +
-      Math.ceil(midTerm) +
-      Math.ceil(classTest2) +
-      Math.ceil(finalExam);
-    const result = calculateGradeAndPoints(totalMarks);
-    modifiedData.grade = result.grade;
-    modifiedData.gradePoints = result.gradePoints;
-    modifiedData.isCompleted = true;
-  }
-
-  if (courseMarks && Object.keys(courseMarks).length > 0) {
-    for (const [key, value] of Object.entries(courseMarks)) {
-      modifiedData[`courseMarks.${key}`] = value;
-    }
-  }
-  const result = await EnrolledCourse.findByIdAndUpdate(
-    isCourseBelongsToFaculty._id,
-    modifiedData,
-    {
-      new: true,
-      runValidators: true,
-    },
-  );
-  return result;
-};
-
 const getMyEnrolledCoursesFromDB = async (
   studentId: string,
   query: Record<string, unknown>,
@@ -252,6 +169,96 @@ const getMyEnrolledCoursesFromDB = async (
     meta,
     result,
   };
+};
+
+const updateEnrolledCourseMarksIntoDB = async (
+  facultyId: string,
+  payload: Partial<TEnrolledCourse>,
+) => {
+  const { semesterRegistration, offeredCourse, student, courseMarks } = payload;
+
+  // Check if semester registration exists
+  const isSemesterRegistrationExists =
+    await SemesterRegistration.findById(semesterRegistration);
+  if (!isSemesterRegistrationExists) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      'Semester registration not found!',
+    );
+  }
+
+  // Check if offered course exists
+  const isOfferedCourseExists = await OfferedCourse.findById(offeredCourse);
+  if (!isOfferedCourseExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Offered course not found!');
+  }
+
+  // Check if student exists
+  const isStudentExists = await Student.findById(student);
+  if (!isStudentExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Student not found!');
+  }
+
+  // Check if faculty exists
+  const faculty = await Faculty.findOne({ id: facultyId }, { _id: 1 });
+  if (!faculty) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Faculty not found!');
+  }
+
+  // Check if course belongs to faculty
+  const isCourseBelongToFaculty = await EnrolledCourse.findOne({
+    semesterRegistration,
+    offeredCourse,
+    student,
+    faculty: faculty._id,
+  });
+  if (!isCourseBelongToFaculty) {
+    throw new AppError(httpStatus.FORBIDDEN, 'You are forbidden!');
+  }
+
+  // Prepare modified data for update
+  const modifiedData: Record<string, unknown> = { ...courseMarks };
+
+  if (courseMarks) {
+    // Update individual course marks
+    for (const [key, value] of Object.entries(courseMarks)) {
+      modifiedData[`courseMarks.${key}`] = value;
+    }
+
+    // Recalculate grade and points if finalExam is provided
+    if (courseMarks.finalExam !== undefined) {
+      const {
+        classTest1 = 0,
+        classTest2 = 0,
+        midTerm = 0,
+        finalExam = 0,
+      } = {
+        ...isCourseBelongToFaculty.courseMarks,
+        ...courseMarks,
+      };
+
+      const totalMarks =
+        Math.ceil(classTest1) +
+        Math.ceil(classTest2) +
+        Math.ceil(midTerm) +
+        Math.ceil(finalExam);
+
+      const result = calculateGradeAndPoints(totalMarks);
+
+      modifiedData.grade = result.grade;
+      modifiedData.gradePoints = result.gradePoints;
+      modifiedData.isCompleted = true;
+    }
+  }
+
+  // Update the enrolled course in the database
+  const result = await EnrolledCourse.findByIdAndUpdate(
+    isCourseBelongToFaculty._id,
+    modifiedData,
+    { new: true },
+  );
+
+  return result;
 };
 
 export const enrolledCourseServices = {
