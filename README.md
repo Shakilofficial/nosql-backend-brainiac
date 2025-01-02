@@ -209,6 +209,10 @@ university-management-backend/
 
 ---
 
+## **Live URL**
+**Click Here to Visit the Live URL of the Project:** https://university-server-shakilofficials-projects-7b0e9e4a.vercel.app
+
+---
 ## **License**
 
 This project is licensed under the [MIT License](LICENSE).
@@ -221,5 +225,6 @@ For queries, suggestions, or feedback, feel free to reach out:
 
 - **Email:** mrshakilhossain@outlook.com
 - **GitHub:** [ShakilOfficial](https://github.com/ShakilOfficial)
+- **LinkedIn:** [Shakil Hossain](https://www.linkedin.com/in/md-shakilhossain)
 
 ---
