@@ -9,7 +9,12 @@ import sendResponse from './app/utils/sendResponse';
 const app: Application = express();
 
 // Middlewares
-app.use(cors({ origin: ['http://localhost:3000', 'http://localhost:5173'] }));
+app.use(
+  cors({
+    origin: ['http://localhost:3000', 'http://localhost:5173'],
+    credentials: true,
+  }),
+);
 app.use(cookieParser());
 app.use(express.json());
 
