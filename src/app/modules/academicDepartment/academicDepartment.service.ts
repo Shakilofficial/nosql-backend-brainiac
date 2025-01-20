@@ -12,7 +12,7 @@ const getAllAcademicDepartmentsFromDB = async (
   query: Record<string, unknown>,
 ) => {
   const AcademicDepartmentQuery = new QueryBuilder(
-    AcademicDepartment.find(),
+    AcademicDepartment.find().populate('academicFaculty'),
     query,
   )
     .search(academicDepartmentSearchableFields)

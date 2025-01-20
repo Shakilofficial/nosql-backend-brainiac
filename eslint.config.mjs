@@ -1,6 +1,10 @@
 import pluginJs from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
+import { createRequire } from 'module';
+
+var require = createRequire(import.meta.url);
+var module = { exports: {} };
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
